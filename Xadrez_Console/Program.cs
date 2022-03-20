@@ -8,7 +8,7 @@ namespace Xadrez_Console
         {
 
             Posicao p = new Posicao(4, 8);
-
+            Console.WriteLine(p);
         }
     }
 }

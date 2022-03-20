@@ -19,7 +19,7 @@ namespace Xadrez_Console.tabuleiro
 
         public override string ToString()
         {
-            return $""
+            return $"{Linha}, {Coluna}";
         }
     }
 }
