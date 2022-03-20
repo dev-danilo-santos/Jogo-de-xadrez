@@ -21,5 +21,12 @@ namespace Xadrez_Console.tabuleiro
         {
             return $"{Linha}, {Coluna}";
         }
+
+        public void definirValores(int linha, int coluna)
+        {
+            this.Linha= linha;
+            this.Coluna= coluna;
+        }
+
     }
 }

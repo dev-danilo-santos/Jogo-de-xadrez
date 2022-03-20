@@ -15,6 +15,11 @@ namespace Jogo_de_Xadrez
         {
         }
 
+        public override bool[,] movimentosPossiveis()
+        {
+            throw new NotImplementedException();
+        }
+
         public override string ToString()
         {
             return "P";
