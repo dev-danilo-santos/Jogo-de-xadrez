@@ -13,6 +13,7 @@ namespace xadrez
         public bool Terminada { get; private set; }
         private HashSet<Peca> pecas;
         private HashSet<Peca> capturadas;
+        public bool xeque { get; private set; }
 
         public PartidaDeXadrez()
         {
@@ -20,12 +21,54 @@ namespace xadrez
             Turno = 1;
             JogadorAtual = Cor.branca;
             Terminada = false;
+            xeque = false;
             pecas = new HashSet<Peca>();
             capturadas = new HashSet<Peca>();
             ColocarPecas();
         }
 
-        public void executaMovimento(Posicao origem, Posicao destino ) 
+        private Peca rei(Cor cor)
+        {
+            foreach (Peca  x     in pecasEmJogo(cor))
+            {
+                if (x is Rei)
+                {
+                    return x;
+                }
+
+            }
+            return null;
+        }
+
+        public bool estaEmXeque(Cor cor)
+        {
+            Peca R = rei(cor);
+            if (R == null)
+            {
+                throw new TabuleiroException($"Ñão tem rei da cor " + cor + " no tabuleiro!");
+            }
+
+            foreach (Peca x in pecasEmJogo(adversaria(cor)))
+            {
+                bool[,] mat = x.movimentosPossiveis(); 
+                if (mat[R.posicao.Linha,R.posicao.Coluna]) 
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private Cor adversaria(Cor cor)
+        {
+            if (cor == Cor.branca)
+            {
+                return Cor.preta;
+            }
+            else { return Cor.branca; }
+        }
+
+        public Peca executaMovimento(Posicao origem, Posicao destino ) 
         {
             Peca p = Tab.RetirarPeca(origem);
             p.IncrementarQtdeMovimento();
@@ -35,7 +78,7 @@ namespace xadrez
             {
                 capturadas.Add(pecaCapturada);
             }
-
+            return pecaCapturada;
         }
 
         public HashSet<Peca> pecasCapturadas(Cor cor)
@@ -67,10 +110,37 @@ namespace xadrez
 
         public void realizaJogada(Posicao origem, Posicao destino)
         {
-            executaMovimento(origem, destino);
+            Peca pecaCapturada =  executaMovimento(origem, destino);
+
+            if (estaEmXeque(JogadorAtual))
+            {
+                desfazMovimento(origem, destino, pecaCapturada);
+                throw new TabuleiroException("Você não pode se colocar em xeque. "); 
+            }
+
+            if (estaEmXeque(adversaria(JogadorAtual)))
+            {
+                xeque = true;
+            }
+            else xeque = false; 
+
             Turno++;
             mudaJogador();
         } 
+
+        public void desfazMovimento(Posicao origem, Posicao destino, Peca pecaCapturada)
+        {
+            Peca p = Tab.RetirarPeca(destino);
+            p.DecrementarQtdeMovimento();
+            if ( pecaCapturada != null)
+            {
+                Tab.ColocarPeca(pecaCapturada, destino);
+                capturadas.Remove(pecaCapturada);
+                capturadas.Remove(pecaCapturada);
+            }
+            Tab.ColocarPeca(p,origem);
+        }
+        
 
         public void validarPosicaoDeOrigem(Posicao pos)
         {
